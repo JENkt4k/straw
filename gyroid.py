@@ -8,25 +8,25 @@ bpy.ops.object.select_by_type(type='META')
 bpy.ops.object.delete()
 
 # User-defined parameters
-cube_volume = 100  # cm^3
+cube_volume = 5000  # cm^3
 nozzle_width = 0.4  # mm
-wall_count = 2
+wall_count = 1
 material_strength = 50  # MPa or any unit (used for future calculations)
-density_factor = 10  # Factor to increase density
+density_factor = 20  # Factor to increase density of metaballs
 
 # Calculate mesh parameters
-meshL = 3  # Number of gyroid cycles
-meshpointcnt = int(density_factor * meshL)  # Resolution
+gyroid_cycles = 6  # Number of gyroid cycles
+meshpointcnt = int(density_factor * gyroid_cycles)  # Resolution
 
 # Derived parameters
 L = cube_volume ** (1/3)  # Cube side length in cm
-scaling_factor = L / (2 * meshL)  # Scale the gyroid to fit within the cube
+scaling_factor = L / (2 * gyroid_cycles)  # Scale the gyroid to fit within the cube
 desired_thickness = nozzle_width * wall_count  # in mm
 radius = desired_thickness / 2  # in mm
 
 
 # Generate grid using NumPy
-x, y, z = np.linspace(-meshL, meshL, meshpointcnt), np.linspace(-meshL, meshL, meshpointcnt), np.linspace(-meshL, meshL, meshpointcnt)
+x, y, z = np.linspace(-gyroid_cycles, gyroid_cycles, meshpointcnt), np.linspace(-gyroid_cycles, gyroid_cycles, meshpointcnt), np.linspace(-gyroid_cycles, gyroid_cycles, meshpointcnt)
 x, y, z = np.meshgrid(x, y, z)
 
 # Evaluate gyroid equation
@@ -53,3 +53,9 @@ for i in range(meshpointcnt):
 
 # Update scene
 bpy.context.view_layer.update()
+
+## Convert to mesh
+try:
+    bpy.ops.object.convert(target='MESH')
+except Exception as e:
+    print(f"Failed to convert metaball to mesh: {e}")
